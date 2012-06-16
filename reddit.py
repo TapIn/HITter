@@ -28,6 +28,6 @@ for i in range(0,int(sys.argv[1])):
     url = "http://www.reddit.com/r/" + sys.argv[2] + ".rss?after=t3_" + after
     parseUrl(url)
 
-f = open(sys.argv[2] + '.hit',"w")
+f = open(sys.argv[2] + '.csv',"w")
 f.write(result.encode('ascii', 'ignore'))
 f.close()
