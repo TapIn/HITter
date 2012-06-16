@@ -13,7 +13,7 @@ class SubRedditParser:
         self.after = ""
 
     def parseUrl(self,url):
-        print (len(self.result.split("\n")) - 1) + " videos found so far..."
+        print str(len(self.result.split("\n")) - 1) + " videos found so far..."
         print "Fetching " + url
 
         feed = feedparser.parse(url)
