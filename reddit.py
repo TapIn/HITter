@@ -22,7 +22,7 @@ class SubRedditParser:
         for item in feed['entries']:
             description = BeautifulSoup(item.description)
             for a in description.findAll('a') :
-                if (a.contents[0] == '[link]') :
+                if (len(a.contents) > 0 and a.contents[0] == '[link]') :
                     href = a['href']
                     if (re.match('https?\:\/\/(www.)?youtu(\.be|be\.com)', href)):
                         self.result = self.result + "\n" + item.title.replace(',', '').replace('"', '') + ',' + href
