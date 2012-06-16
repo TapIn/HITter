@@ -2,32 +2,53 @@ import feedparser, sys, re
 from BeautifulSoup import BeautifulSoup
 
 if len(sys.argv) < 3:
-    print "Usage: python reddit.py [number of pages] [subreddit]"
+    print "Usage: python reddit.py [number of pages] [subreddits]"
     exit()
 
-result = ""
-after = ""
+class SubRedditParser:
+    def __init__(self, reddit, count):
+        self.reddit = reddit
+        self.count = count
+        self.result = "name,url"
+        self.after = ""
 
-def parseUrl(url):
-    global result
-    global after
-    print "Fetching " + url
+    def parseUrl(self,url):
+        print (len(self.result.split("\n")) - 1) + " videos found so far..."
+        print "Fetching " + url
 
-    feed = feedparser.parse(url)
+        feed = feedparser.parse(url)
+        last_item = None
 
-    for item in feed['entries']:
-        description = BeautifulSoup(item.description)
-        for a in description.findAll('a') :
-            if (a.contents[0] == '[link]') :
-                href = a['href']
-                if (re.match('https?\:\/\/(www.)?youtu(\.be|be\.com)', href)):
-                    result = result + "\n" + item.title.replace(',', '').replace('"', '') + ',' + href
-                    after = re.search('comments/([a-zA-Z0-9]*)/', item.guid).groups(1)[0]
+        for item in feed['entries']:
+            description = BeautifulSoup(item.description)
+            for a in description.findAll('a') :
+                if (a.contents[0] == '[link]') :
+                    href = a['href']
+                    if (re.match('https?\:\/\/(www.)?youtu(\.be|be\.com)', href)):
+                        self.result = self.result + "\n" + item.title.replace(',', '').replace('"', '') + ',' + href
+            last_item = item
 
-for i in range(0,int(sys.argv[1])):
-    url = "http://www.reddit.com/r/" + sys.argv[2] + ".rss?after=t3_" + after
-    parseUrl(url)
+        new_after = re.search('comments/([a-zA-Z0-9]*)/', last_item.link).groups(1)[0]
+        if (new_after == self.after):
+            return True
 
-f = open(sys.argv[2] + '.csv',"w")
-f.write(result.encode('ascii', 'ignore'))
-f.close()
+        self.after = new_after
+        return False
+
+    def parse(self):
+        for i in range(0,self.count):
+            url = "http://www.reddit.com/r/" + self.reddit + ".rss?after=t3_" + self.after
+            if(self.parseUrl(url)):
+                print "No more pages to get"
+                break
+
+        f = open(self.reddit + '.csv',"w")
+        f.write(self.result.encode('ascii', 'ignore'))
+        f.close()
+
+i = 0
+for arg in sys.argv:
+    if i >= 2:
+        s = SubRedditParser(arg, int(sys.argv[1]))
+        s.parse()
+    i = i + 1
