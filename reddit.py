@@ -28,7 +28,9 @@ class SubRedditParser:
                         self.result = self.result + "\n" + item.title.replace(',', '').replace('"', '') + ',' + href
             last_item = item
 
-        new_after = re.search('comments/([a-zA-Z0-9]*)/', last_item.link).groups(1)[0]
+        new_after = self.after
+        if (not last_item == None):
+            new_after = re.search('comments/([a-zA-Z0-9]*)/', last_item.link).groups(1)[0]
         if (new_after == self.after):
             return True
 
